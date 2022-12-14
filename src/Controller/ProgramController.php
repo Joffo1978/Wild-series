@@ -5,14 +5,19 @@
 namespace App\Controller;
 
 
+use App\Entity\Program;
+use App\Form\ProgramType;
+use App\Repository\ProgramRepository;
 use App\Repository\SeasonRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\Routing\Annotation\Route;
 
-use App\Repository\ProgramRepository;
+
+
 
 Class ProgramController extends AbstractController
 
@@ -32,21 +37,45 @@ Class ProgramController extends AbstractController
         );
 
     }
-
-    #[Route('/program/show/{id<^[0-9]+$>}', name: 'show')]
-
-    public function show(int $id, ProgramRepository $programRepository): Response
+    #[Route('program/new', name: 'program_new')]
+    public function new(Request $request, ProgramRepository $programRepository): Response
 
     {
-        $program = $programRepository->findOneBy(['id' => $id]);
-        // same as $program = $programRepository->find($id);
+        $program= new Program();
+        // Create the form, linked with $category
+
+        $form = $this->createForm(ProgramType::class, $program);
+        // Get data from HTTP request
+
+        $form->handleRequest($request);
+
+        // Was the form submitted ?
+
+        if ($form->isSubmitted()) {
+            $programRepository->save($program, true);
+            // Deal with the submitted data
+
+            // For example : persiste & flush the entity
+
+            // And redirect to a route that display the result
+
+        }
 
 
+        // Render the form
+        // return render twig
+        return $this->renderForm('program/new.html.twig',[
 
+            'form' => $form,]);
+    }
+    #[Route('/program/show/{id}', name: 'program_show')]
 
+    public function show(Program $program): Response
+
+    {
         return $this->render('program/show.html.twig', [
 
-            'program' => $program,
+            ['program'=>$program]
 
         ]);
     }
